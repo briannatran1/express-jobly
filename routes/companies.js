@@ -49,13 +49,16 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-    const result = jsonschema.validate(req.query, companyFilter, {
-        required: true,
-    });
 
-    if (!result.valid) {
-        const errs = result.errors.map((err) => err.stack);
-        throw new BadRequestError(errs);
+    if (req.query) {
+        const result = jsonschema.validate(req.query, companyFilter, {
+            required: true,
+        });
+
+        if (!result.valid) {
+            const errs = result.errors.map((err) => err.stack);
+            throw new BadRequestError(errs);
+        }
     }
 
     const companies = await Company.findAll();
