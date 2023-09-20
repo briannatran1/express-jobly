@@ -12,7 +12,7 @@ const Company = require("../models/company");
 const companyFilter = require("../schemas/companyFilter.json");
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
-const checkQuery = require("../helpers/checkQuery");
+// const checkQuery = require("../helpers/checkQuery");
 
 const router = new express.Router();
 
@@ -50,11 +50,22 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-
     //convert query strs to int here
-
+    let reqQuery;
     if (req.query) {
-        const result = jsonschema.validate(req.query, companyFilter, {
+        // if (req.query.maxEmployees) {
+        //     req.query.maxEmployees = parseInt(req.query.maxEmployees);
+        // }
+        // if (req.query.minEmployees) {
+        //     req.query.minEmployees = parseInt(req.query.minEmployees);
+        // }
+        reqQuery = {
+            maxEmployees: Number(req.query?.maxEmployees) || 1000,
+            minEmployees: Number(req.query?.minEmployees) || 0,
+            // nameLike: req.query.nameLike,
+        };
+
+        const result = jsonschema.validate(reqQuery, companyFilter, {
             required: true,
         });
 
@@ -64,7 +75,7 @@ router.get("/", async function (req, res, next) {
         }
     }
 
-    const companies = await Company.findAll();
+    const companies = await Company.findAll(reqQuery);
 
     return res.json({ companies });
 });

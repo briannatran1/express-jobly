@@ -2,8 +2,7 @@
 
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
-const checkQuery = require('../helpers/checkQuery');
+const { sqlForPartialUpdate, sqlForQueryFilter } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -56,20 +55,27 @@ class Company {
      * */
 
     //TODO: use $1 and pass in values at end of query
-    static async findAll() {
-        const where = checkQuery();
+    static async findAll(data) {
+        // const where = checkQuery();
 
-        const companiesRes = await db.query(
-            `
+        const { setCols, values } = sqlForQueryFilter(data, {
+            maxEmployees: "num_employees",
+            minEmployees: "num_employees",
+            nameLike: "name",
+        });
+
+        const sqlQuery = `
         SELECT handle,
                name,
                description,
                num_employees AS "numEmployees",
                logo_url      AS "logoUrl"
         FROM companies
-        ${where}
-        ORDER BY name`
-        );
+        WHERE ${setCols}
+        ORDER BY name`;
+
+        const companiesRes = await db.query(sqlQuery, [...values]);
+
         return companiesRes.rows;
     }
 
@@ -94,7 +100,7 @@ class Company {
 
         // return str and arr of corresponding values
 
-        const where = values.length > 0 ? `WHERE ${values.join(', AND ')}` : '';
+        const where = values.length > 0 ? `WHERE ${values.join(", AND ")}` : "";
         return where;
     }
 
