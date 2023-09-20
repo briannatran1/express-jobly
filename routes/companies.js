@@ -9,11 +9,11 @@ const { BadRequestError } = require("../expressError");
 const { ensureLoggedIn } = require("../middleware/auth");
 const Company = require("../models/company");
 
+const companyFilter = require("../schemas/companyQueryParams.json");
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
 
 const router = new express.Router();
-
 
 /** POST / { company } =>  { company }
  *
@@ -25,18 +25,16 @@ const router = new express.Router();
  */
 
 router.post("/", ensureLoggedIn, async function (req, res, next) {
-  const validator = jsonschema.validate(
-    req.body,
-    companyNewSchema,
-    { required: true }
-  );
-  if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
-    throw new BadRequestError(errs);
-  }
+    const validator = jsonschema.validate(req.body, companyNewSchema, {
+        required: true,
+    });
+    if (!validator.valid) {
+        const errs = validator.errors.map((e) => e.stack);
+        throw new BadRequestError(errs);
+    }
 
-  const company = await Company.create(req.body);
-  return res.status(201).json({ company });
+    const company = await Company.create(req.body);
+    return res.status(201).json({ company });
 });
 
 /** GET /  =>
@@ -51,19 +49,18 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  const companies = await Company.findAll();
+    const result = jsonschema.validate(req.query, companyFilter, {
+        required: true,
+    });
 
-  if (req.query.nameLike) {
-    return companies.filter(c => c);
-  }
-  if (req.query.minEmployees) {
-    return res.json(companies.filter(c => c.numEmployees >= req.query.minEmployees));
-  }
-  if (req.query.maxEmployees) {
-    return res.json(companies.filter(c => c.numEmployees <= req.query.maxEmployees));
-  }
+    if (!result.valid) {
+        const errs = result.errors.map((err) => err.stack);
+        throw new BadRequestError(errs);
+    }
 
-  return res.json({ companies });
+    const companies = await Company.findAll();
+
+    return res.json({ companies });
 });
 
 /** GET /[handle]  =>  { company }
@@ -75,8 +72,8 @@ router.get("/", async function (req, res, next) {
  */
 
 router.get("/:handle", async function (req, res, next) {
-  const company = await Company.get(req.params.handle);
-  return res.json({ company });
+    const company = await Company.get(req.params.handle);
+    return res.json({ company });
 });
 
 /** PATCH /[handle] { fld1, fld2, ... } => { company }
@@ -91,18 +88,16 @@ router.get("/:handle", async function (req, res, next) {
  */
 
 router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
-  const validator = jsonschema.validate(
-    req.body,
-    companyUpdateSchema,
-    { required: true }
-  );
-  if (!validator.valid) {
-    const errs = validator.errors.map(e => e.stack);
-    throw new BadRequestError(errs);
-  }
+    const validator = jsonschema.validate(req.body, companyUpdateSchema, {
+        required: true,
+    });
+    if (!validator.valid) {
+        const errs = validator.errors.map((e) => e.stack);
+        throw new BadRequestError(errs);
+    }
 
-  const company = await Company.update(req.params.handle, req.body);
-  return res.json({ company });
+    const company = await Company.update(req.params.handle, req.body);
+    return res.json({ company });
 });
 
 /** DELETE /[handle]  =>  { deleted: handle }
@@ -111,9 +106,8 @@ router.patch("/:handle", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.delete("/:handle", ensureLoggedIn, async function (req, res, next) {
-  await Company.remove(req.params.handle);
-  return res.json({ deleted: req.params.handle });
+    await Company.remove(req.params.handle);
+    return res.json({ deleted: req.params.handle });
 });
-
 
 module.exports = router;
