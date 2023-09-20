@@ -3,6 +3,7 @@
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
+const checkQuery = require('../helpers/checkQuery');
 
 /** Related functions for companies. */
 
@@ -54,7 +55,10 @@ class Company {
      * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
      * */
 
+    //TODO: use $1 and pass in values at end of query
     static async findAll() {
+        const where = checkQuery();
+
         const companiesRes = await db.query(
             `
         SELECT handle,
@@ -63,9 +67,35 @@ class Company {
                num_employees AS "numEmployees",
                logo_url      AS "logoUrl"
         FROM companies
+        ${where}
         ORDER BY name`
         );
         return companiesRes.rows;
+    }
+
+    static _filterCompanies() {
+        const whereClauseParts = [];
+        //
+
+        if (req.query.maxEmployees) {
+            whereClauseParts.push(`num_employees <= $1`);
+        }
+
+        if (req.query.minEmployees) {
+            whereClauseParts.push(`num_employees >= `);
+        }
+
+        if (req.query.nameLike) {
+            whereClauseParts.push(`name ILIKE %%`);
+        }
+
+        // If the minEmployees parameter is greater than the maxEmployees parameter,
+        // respond with a 400 error with an appropriate message.
+
+        // return str and arr of corresponding values
+
+        const where = values.length > 0 ? `WHERE ${values.join(', AND ')}` : '';
+        return where;
     }
 
     /** Given a company handle, return data about company.
