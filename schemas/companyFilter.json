@@ -5,13 +5,13 @@
     "description": "Validates incoming query params",
     "type": "object",
     "properties": {
-        "nameLike":{
+        "nameLike": {
             "type": "string"
         },
-        "minEmployees":{
+        "minEmployees": {
             "type": "integer"
         },
-        "maxEmployees":{
+        "maxEmployees": {
             "type": "integer"
         }
     },
