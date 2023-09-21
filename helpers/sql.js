@@ -2,6 +2,8 @@
 
 const { BadRequestError } = require("../expressError");
 
+//TODO: can be less verbose in docstring
+
 /**
  * Updates specific columns in database.
  *

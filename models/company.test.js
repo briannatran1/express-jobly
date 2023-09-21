@@ -117,6 +117,7 @@ describe("findAll", function () {
         ]);
     });
 
+    //TODO: should throw error not []
     test("min greater than max", async function () {
         let data = { maxEmployees: 300, minEmployees: 400 };
         let companies = await Company.findAll(data);
@@ -124,6 +125,7 @@ describe("findAll", function () {
     });
 });
 
+//TODO: more coverage
 describe("_filterCompanies", function () {
     test('tests for one filter', async function () {
         const data = { nameLike: '%c%' };

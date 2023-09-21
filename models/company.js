@@ -54,7 +54,10 @@ class Company {
      * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
      * */
 
-    static async findAll(data) {
+    //default param => flexible for 1 query
+    static async findAll(data = {}) {
+        //TODO: use ternary to decide if we should include WHERE clause => can do in 1 query
+
         if (Object.keys(data).length !== 0) {
             const { setCols, values } = Company._filterCompanies(data);
 
@@ -89,6 +92,7 @@ class Company {
      * Returns { setCols: '', values: [] }
     */
 
+
     static _filterCompanies(dataToQuery) {
         const keys = Object.keys(dataToQuery);
 
@@ -105,6 +109,8 @@ class Company {
             }
         });
 
+        //TODO: WHERE can live in this fn ternary op
+        // is there anything in cols? if yes, give WHERE else, give ''
         return {
             setCols: cols.join(" AND "),
             // [1, 3, %gabe%]
