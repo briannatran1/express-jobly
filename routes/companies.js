@@ -50,19 +50,22 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-    //convert query strs to int here
     let reqQuery;
     if (req.query) {
-        // if (req.query.maxEmployees) {
-        //     req.query.maxEmployees = parseInt(req.query.maxEmployees);
+        // for (let key of Object.keys(req.query)) {
+        //     if (key === 'maxEmployees') {
+        //         reqQuery[key] = Number(req.query.key);
+        //         console.log(req.query);
+        //     }
+        //     else {
+        //         reqQuery[key] = req.query.key;
+        //     }
         // }
-        // if (req.query.minEmployees) {
-        //     req.query.minEmployees = parseInt(req.query.minEmployees);
-        // }
+
         reqQuery = {
             maxEmployees: Number(req.query?.maxEmployees) || 1000,
             minEmployees: Number(req.query?.minEmployees) || 0,
-            // nameLike: req.query.nameLike,
+            nameLike: req.query?.nameLike
         };
 
         const result = jsonschema.validate(reqQuery, companyFilter, {
@@ -74,6 +77,7 @@ router.get("/", async function (req, res, next) {
             throw new BadRequestError(errs);
         }
     }
+    console.log(req.query);
 
     const companies = await Company.findAll(reqQuery);
 
