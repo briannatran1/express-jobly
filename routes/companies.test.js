@@ -147,6 +147,20 @@ describe("GET /companies", function () {
             },
         });
     });
+
+    test('tests for error validation in req.body', async function () {
+        const resp = await request(app).get(
+            "/companies?wrong=19"
+        );
+        expect(resp.body).toEqual({
+            "error": {
+                "message": [
+                    "instance is not allowed to have the additional property \"wrong\""
+                ],
+                "status": 400
+            }
+        });
+    });
 });
 
 /************************************** GET /companies/:handle */
@@ -272,3 +286,5 @@ describe("DELETE /companies/:handle", function () {
         expect(resp.statusCode).toEqual(401);
     });
 });
+
+//expand strings for test names => be more descriptive

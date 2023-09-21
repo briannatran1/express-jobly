@@ -12,6 +12,7 @@ const Company = require("../models/company");
 const companyFilter = require("../schemas/companyFilter.json");
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const companyQuery = require("../schemas/companyQuery.json");
 
 const router = new express.Router();
 
@@ -51,6 +52,14 @@ router.post("/", ensureLoggedIn, isAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
     let reqQuery;
     if (req.query) {
+        const results = jsonschema.validate(req.query, companyQuery, {
+            required: true,
+        });
+
+        if (!results.valid) {
+            const errs = results.errors.map((err) => err.stack);
+            throw new BadRequestError(errs);
+        }
         //don't need to delete reqQuery keys; dynamic WHERE fixes this
         reqQuery = {
             maxEmployees: Number(req.query?.maxEmployees) || null,
@@ -68,7 +77,6 @@ router.get("/", async function (req, res, next) {
             delete reqQuery.minEmployees;
         }
 
-        // TODO: fails if different key entered in query params
         const result = jsonschema.validate(reqQuery, companyFilter, {
             required: true,
         });

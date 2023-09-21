@@ -27,6 +27,8 @@ const router = express.Router();
  * Authorization required: login
  **/
 
+//TODO: use single middware fn
+
 router.post("/", ensureLoggedIn, isAdmin, async function (req, res, next) {
   const validator = jsonschema.validate(
     req.body,
@@ -63,6 +65,7 @@ router.get("/", ensureLoggedIn, isAdmin, async function (req, res, next) {
  *
  * Authorization required: login
  **/
+//TODO: use 1 middleware
 
 router.get("/:username", ensureLoggedIn, isAdminOrUser, async function (req, res, next) {
   const user = await User.get(req.params.username);

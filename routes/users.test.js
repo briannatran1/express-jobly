@@ -47,6 +47,7 @@ describe("POST /users", function () {
     });
   });
 
+  //TODO: test-string doesn't work for non-admins
   test("does not work for users", async function () {
     const resp = await request(app)
       .post("/users")
@@ -220,6 +221,8 @@ describe("GET /users/:username", function () {
   });
 });
 
+//TODO: add for non-user
+
 /************************************** PATCH /users/:username */
 
 describe("PATCH /users/:username", () => {
@@ -241,6 +244,7 @@ describe("PATCH /users/:username", () => {
     });
   });
 
+  // non-admin user
   test("works for user", async function () {
     const resp = await request(app)
       .patch(`/users/u1`)
@@ -259,6 +263,7 @@ describe("PATCH /users/:username", () => {
     });
   });
 
+  //TODO: non-owner
   test("does not work for different user", async function () {
     const resp = await request(app)
       .patch(`/users/u2`)

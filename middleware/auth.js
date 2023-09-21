@@ -43,6 +43,7 @@ function ensureLoggedIn(req, res, next) {
  * If not, raises Unauthorized.
  */
 
+//TODO: check if logged in so we can just use this middleware
 function isAdmin(req, res, next) {
     if (res.locals.user?.isAdmin) return next();
     throw new UnauthorizedError();
@@ -50,6 +51,7 @@ function isAdmin(req, res, next) {
 
 /** Middleware: Requires user is user or admin for route. */
 
+//TODO: change fn name to isAdminOrCorrectUser
 function isAdminOrUser(req, res, next) {
     const currentUser = res.locals.user;
     const correctUsername = currentUser?.username === req.params.username;
