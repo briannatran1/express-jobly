@@ -55,7 +55,6 @@ class Company {
      * */
 
     static async findAll(data) {
-
         const { setCols, values } = Company._filterCompanies(data);
 
         const sqlQuery = `

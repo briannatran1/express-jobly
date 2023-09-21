@@ -52,21 +52,29 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
     let reqQuery;
     if (req.query) {
-        // for (let key of Object.keys(req.query)) {
-        //     if (key === 'maxEmployees') {
-        //         reqQuery[key] = Number(req.query.key);
-        //         console.log(req.query);
-        //     }
-        //     else {
-        //         reqQuery[key] = req.query.key;
-        //     }
-        // }
-
         reqQuery = {
-            maxEmployees: Number(req.query?.maxEmployees) || 1000,
-            minEmployees: Number(req.query?.minEmployees) || 0,
-            nameLike: req.query?.nameLike
+            maxEmployees: Number(req.query?.maxEmployees) || null,
+            minEmployees: Number(req.query?.minEmployees) || null,
+            nameLike: req.query?.nameLike || null,
         };
+
+        if (reqQuery["nameLike"] === null) {
+            delete reqQuery.nameLike;
+        }
+        if (reqQuery["maxEmployees"] === null) {
+            delete reqQuery.maxEmployees;
+        }
+        if (reqQuery["minEmployees"] === null) {
+            delete reqQuery.minEmployees;
+        }
+
+        if (req.query.maxEmployees && req.query.minEmployees) {
+            if (reqQuery.minEmployees > reqQuery.maxEmployees) {
+                throw new BadRequestError(
+                    "Min employees must be less than max employees"
+                );
+            }
+        }
 
         const result = jsonschema.validate(reqQuery, companyFilter, {
             required: true,
@@ -77,7 +85,6 @@ router.get("/", async function (req, res, next) {
             throw new BadRequestError(errs);
         }
     }
-    console.log(req.query);
 
     const companies = await Company.findAll(reqQuery);
 
