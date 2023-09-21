@@ -12,7 +12,6 @@ const Company = require("../models/company");
 const companyFilter = require("../schemas/companyFilter.json");
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
-// const checkQuery = require("../helpers/checkQuery");
 
 const router = new express.Router();
 
@@ -52,7 +51,7 @@ router.post("/", ensureLoggedIn, isAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
     let reqQuery;
     if (req.query) {
-        //TODO: don't need to delete reqQuery keys; dynamic WHERE fixes this
+        //don't need to delete reqQuery keys; dynamic WHERE fixes this
         reqQuery = {
             maxEmployees: Number(req.query?.maxEmployees) || null,
             minEmployees: Number(req.query?.minEmployees) || null,
@@ -69,14 +68,6 @@ router.get("/", async function (req, res, next) {
             delete reqQuery.minEmployees;
         }
 
-        // TODO: belongs in model
-        if (req.query.maxEmployees && req.query.minEmployees) {
-            if (reqQuery.minEmployees > reqQuery.maxEmployees) {
-                throw new BadRequestError(
-                    "Min employees must be less than max employees"
-                );
-            }
-        }
         // TODO: fails if different key entered in query params
         const result = jsonschema.validate(reqQuery, companyFilter, {
             required: true,

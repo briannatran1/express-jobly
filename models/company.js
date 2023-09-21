@@ -54,44 +54,35 @@ class Company {
      * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
      * */
 
-    //default param => flexible for 1 query
     static async findAll(data = {}) {
-        //TODO: use ternary to decide if we should include WHERE clause => can do in 1 query
-
-        if (Object.keys(data).length !== 0) {
-            const { setCols, values } = Company._filterCompanies(data);
-
-            const sqlQuery = `
-            SELECT handle,
-                   name,
-                   description,
-                   num_employees AS "numEmployees",
-                   logo_url      AS "logoUrl"
-            FROM companies
-            WHERE ${setCols}
-            ORDER BY name`;
-
-            const companiesRes = await db.query(sqlQuery, [...values]);
-            return companiesRes.rows;
+        if (data.maxEmployees && data.minEmployees) {
+            if (data.minEmployees > data.maxEmployees) {
+                throw new BadRequestError(
+                    "Min employees must be less than max employees"
+                );
+            }
         }
 
-        const results = await db.query(`
+        const { setCols, values } = Company._filterCompanies(data);
+
+        const sqlQuery = `
             SELECT handle,
                    name,
                    description,
                    num_employees AS "numEmployees",
                    logo_url      AS "logoUrl"
             FROM companies
-            ORDER BY name`);
+            ${setCols}
+            ORDER BY name`;
 
-        return results.rows;
+        const companiesRes = await db.query(sqlQuery, [...values]);
+        return companiesRes.rows;
     }
 
     /** Filters companies based on some parameters
      *
      * Returns { setCols: '', values: [] }
-    */
-
+     */
 
     static _filterCompanies(dataToQuery) {
         const keys = Object.keys(dataToQuery);
@@ -109,10 +100,9 @@ class Company {
             }
         });
 
-        //TODO: WHERE can live in this fn ternary op
-        // is there anything in cols? if yes, give WHERE else, give ''
+        const data = cols.length > 0 ? "WHERE" + " " + cols.join(" AND ") : "";
         return {
-            setCols: cols.join(" AND "),
+            setCols: data,
             // [1, 3, %gabe%]
             values: Object.values(dataToQuery),
         };
