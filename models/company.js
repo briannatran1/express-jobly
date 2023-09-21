@@ -54,15 +54,9 @@ class Company {
      * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
      * */
 
-    //TODO: use $1 and pass in values at end of query
     static async findAll(data) {
-        // const where = checkQuery();
 
-        const { setCols, values } = sqlForQueryFilter(data, {
-            maxEmployees: "num_employees",
-            minEmployees: "num_employees",
-            nameLike: "name",
-        });
+        const { setCols, values } = Company._filterCompanies(data);
 
         const sqlQuery = `
         SELECT handle,
@@ -79,30 +73,61 @@ class Company {
         return companiesRes.rows;
     }
 
-    static _filterCompanies() {
-        const whereClauseParts = [];
-        //
+    // get rid of jsToSql; just look for key name
+    static _filterCompanies(dataToQuery) {
+        const keys = Object.keys(dataToQuery);
+        if (keys.length === 0) throw new BadRequestError("No data");
 
-        if (req.query.maxEmployees) {
-            whereClauseParts.push(`num_employees <= $1`);
-        }
+        // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
+        // don't need map
+        const cols = keys.map((colName, idx) => {
+            if (colName === "nameLike") {
+                // thing that's going to be put in {} is %name%
+                return `name ILIKE $${idx + 1}`;
+            }
+            if (colName === "maxEmployees") {
+                return `num_employees <= $${idx + 1}`;
+            }
+            if (colName === "minEmployees") {
+                return `num_employees >= $${idx + 1}`;
+            }
+        });
 
-        if (req.query.minEmployees) {
-            whereClauseParts.push(`num_employees >= `);
-        }
-
-        if (req.query.nameLike) {
-            whereClauseParts.push(`name ILIKE %%`);
-        }
-
-        // If the minEmployees parameter is greater than the maxEmployees parameter,
-        // respond with a 400 error with an appropriate message.
-
-        // return str and arr of corresponding values
-
-        const where = values.length > 0 ? `WHERE ${values.join(", AND ")}` : "";
-        return where;
+        console.log({
+            setCols: cols.join(" AND "),
+            values: Object.values(dataToQuery),
+        });
+        return {
+            setCols: cols.join(" AND "),
+            // [1, 3, %gabe%]
+            values: Object.values(dataToQuery),
+        };
     }
+
+    // static _filterCompanies() {
+    //     const whereClauseParts = [];
+    //     //
+
+    //     if (req.query.maxEmployees) {
+    //         whereClauseParts.push(`num_employees <= $1`);
+    //     }
+
+    //     if (req.query.minEmployees) {
+    //         whereClauseParts.push(`num_employees >= `);
+    //     }
+
+    //     if (req.query.nameLike) {
+    //         whereClauseParts.push(`name ILIKE %%`);
+    //     }
+
+    //     // If the minEmployees parameter is greater than the maxEmployees parameter,
+    //     // respond with a 400 error with an appropriate message.
+
+    //     // return str and arr of corresponding values
+
+    //     const where = values.length > 0 ? `WHERE ${values.join(", AND ")}` : "";
+    //     return where;
+    // }
 
     /** Given a company handle, return data about company.
      *
