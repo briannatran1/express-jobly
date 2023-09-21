@@ -55,30 +55,43 @@ class Company {
      * */
 
     static async findAll(data) {
-        const { setCols, values } = Company._filterCompanies(data);
+        if (Object.keys(data).length !== 0) {
+            const { setCols, values } = Company._filterCompanies(data);
 
-        const sqlQuery = `
-        SELECT handle,
-               name,
-               description,
-               num_employees AS "numEmployees",
-               logo_url      AS "logoUrl"
-        FROM companies
-        WHERE ${setCols}
-        ORDER BY name`;
+            const sqlQuery = `
+            SELECT handle,
+                   name,
+                   description,
+                   num_employees AS "numEmployees",
+                   logo_url      AS "logoUrl"
+            FROM companies
+            WHERE ${setCols}
+            ORDER BY name`;
 
-        const companiesRes = await db.query(sqlQuery, [...values]);
+            const companiesRes = await db.query(sqlQuery, [...values]);
+            return companiesRes.rows;
+        }
 
-        return companiesRes.rows;
+        const results = await db.query(`
+            SELECT handle,
+                   name,
+                   description,
+                   num_employees AS "numEmployees",
+                   logo_url      AS "logoUrl"
+            FROM companies
+            ORDER BY name`);
+
+        return results.rows;
     }
 
-    // get rid of jsToSql; just look for key name
+    /** Filters companies based on some parameters
+     *
+     * Returns { setCols: '', values: [] }
+    */
+
     static _filterCompanies(dataToQuery) {
         const keys = Object.keys(dataToQuery);
-        if (keys.length === 0) throw new BadRequestError("No data");
 
-        // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
-        // don't need map
         const cols = keys.map((colName, idx) => {
             if (colName === "nameLike") {
                 // thing that's going to be put in {} is %name%
@@ -92,41 +105,12 @@ class Company {
             }
         });
 
-        console.log({
-            setCols: cols.join(" AND "),
-            values: Object.values(dataToQuery),
-        });
         return {
             setCols: cols.join(" AND "),
             // [1, 3, %gabe%]
             values: Object.values(dataToQuery),
         };
     }
-
-    // static _filterCompanies() {
-    //     const whereClauseParts = [];
-    //     //
-
-    //     if (req.query.maxEmployees) {
-    //         whereClauseParts.push(`num_employees <= $1`);
-    //     }
-
-    //     if (req.query.minEmployees) {
-    //         whereClauseParts.push(`num_employees >= `);
-    //     }
-
-    //     if (req.query.nameLike) {
-    //         whereClauseParts.push(`name ILIKE %%`);
-    //     }
-
-    //     // If the minEmployees parameter is greater than the maxEmployees parameter,
-    //     // respond with a 400 error with an appropriate message.
-
-    //     // return str and arr of corresponding values
-
-    //     const where = values.length > 0 ? `WHERE ${values.join(", AND ")}` : "";
-    //     return where;
-    // }
 
     /** Given a company handle, return data about company.
      *
