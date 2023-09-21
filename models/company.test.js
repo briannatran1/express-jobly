@@ -9,6 +9,7 @@ const {
     commonAfterEach,
     commonAfterAll,
 } = require("./_testCommon");
+const { response } = require("express");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -61,7 +62,8 @@ describe("create", function () {
 
 describe("findAll", function () {
     test("works: no filter", async function () {
-        let companies = await Company.findAll();
+        let data = {};
+        let companies = await Company.findAll(data);
         expect(companies).toEqual([
             {
                 handle: "c1",
@@ -86,8 +88,10 @@ describe("findAll", function () {
             },
         ]);
     });
+
     test("works: name filter", async function () {
-        let companies = await Company.findAll();
+        let data = { nameLike: '%c%' };
+        let companies = await Company.findAll(data);
         expect(companies).toEqual([
             {
                 handle: "c1",
@@ -111,6 +115,38 @@ describe("findAll", function () {
                 logoUrl: "http://c3.img",
             },
         ]);
+    });
+
+    test("min greater than max", async function () {
+        let data = { maxEmployees: 300, minEmployees: 400 };
+        let companies = await Company.findAll(data);
+        expect(companies).toEqual([]);
+    });
+});
+
+describe("_filterCompanies", function () {
+    test('tests for one filter', async function () {
+        const data = { nameLike: '%c%' };
+
+        const results = Company._filterCompanies(data);
+
+        expect(results).toEqual({
+            setCols: 'name ILIKE $1',
+            values: ['%c%']
+        });
+    });
+});
+
+describe("_filterCompanies", function () {
+    test('tests for 2 filters', async function () {
+        const data = { nameLike: '%c%', minEmployees: 1 };
+
+        const results = Company._filterCompanies(data);
+
+        expect(results).toEqual({
+            setCols: 'name ILIKE $1 AND num_employees >= $2',
+            values: ['%c%', 1]
+        });
     });
 });
 

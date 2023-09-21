@@ -95,6 +95,47 @@ describe("GET /companies", function () {
         ],
     });
   });
+
+  test("tests query params", async function () {
+    const resp = await request(app).get("/companies?maxEmployees=3");
+
+    expect(resp.statusCode).toEqual(200);
+    expect(resp.body).toEqual({
+      companies:
+        [
+          {
+            handle: "c1",
+            name: "C1",
+            description: "Desc1",
+            numEmployees: 1,
+            logoUrl: "http://c1.img",
+          },
+          {
+            handle: "c2",
+            name: "C2",
+            description: "Desc2",
+            numEmployees: 2,
+            logoUrl: "http://c2.img",
+          },
+          {
+            handle: "c3",
+            name: "C3",
+            description: "Desc3",
+            numEmployees: 3,
+            logoUrl: "http://c3.img",
+          },
+        ],
+    });
+  });
+
+  test("min employees > max employees", async function () {
+    const resp = await request(app).get("/companies?maxEmployees=1&minEmployees=3");
+
+    expect(resp.statusCode).toEqual(400);
+    expect(resp.body.error.message).toEqual(
+      "Min employees must be less than max employees"
+    );
+  });
 });
 
 /************************************** GET /companies/:handle */
