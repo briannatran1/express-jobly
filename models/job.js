@@ -86,6 +86,7 @@ class Job {
         WHERE company_handle = $1`,
             [companyHandle]
         );
+        console.log(jobRes);
 
         const jobs = jobRes.rows;
 

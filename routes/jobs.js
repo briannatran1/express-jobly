@@ -25,16 +25,16 @@ const router = new express.Router();
  */
 
 router.post("/", ensureLoggedIn, isAdmin, async function (req, res, next) {
-    const validator = jsonschema.validate(req.body, jobNewSchema, {
-        required: true,
-    });
-    if (!validator.valid) {
-        const errs = validator.errors.map((e) => e.stack);
-        throw new BadRequestError(errs);
-    }
+  const validator = jsonschema.validate(req.body, jobNewSchema, {
+    required: true,
+  });
+  if (!validator.valid) {
+    const errs = validator.errors.map((e) => e.stack);
+    throw new BadRequestError(errs);
+  }
 
-    const job = await Job.create(req.body);
-    return res.status(201).json({ job });
+  const job = await Job.create(req.body);
+  return res.status(201).json({ job });
 });
 
 /** GET /  =>
@@ -49,11 +49,11 @@ router.post("/", ensureLoggedIn, isAdmin, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-    const jobs = await Job.findAll();
-    return res.json({ jobs });
+  const jobs = await Job.findAll();
+  return res.json({ jobs });
 });
 
-/** GET /[id]  =>  { job }
+/** GET /[company_handle]  =>  { job }
  *
  *  Job is { id, title, salary, equity, company_handle }
  *   where jobs is [{ id, title, salary, equity }, ...]
@@ -61,9 +61,9 @@ router.get("/", async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get("/:id", async function (req, res, next) {
-    const job = await Job.get(req.params.id);
-    return res.json({ job });
+router.get("/:companyHandle", async function (req, res, next) {
+  const job = await Job.get(req.params.companyHandle);
+  return res.json({ job });
 });
 
 /** PATCH /[id] { fld1, fld2, ... } => { job }
@@ -78,16 +78,16 @@ router.get("/:id", async function (req, res, next) {
  */
 
 router.patch("/:id", ensureLoggedIn, isAdmin, async function (req, res, next) {
-    const validator = jsonschema.validate(req.body, jobUpdate, {
-        required: true,
-    });
-    if (!validator.valid) {
-        const errs = validator.errors.map((e) => e.stack);
-        throw new BadRequestError(errs);
-    }
+  const validator = jsonschema.validate(req.body, jobUpdate, {
+    required: true,
+  });
+  if (!validator.valid) {
+    const errs = validator.errors.map((e) => e.stack);
+    throw new BadRequestError(errs);
+  }
 
-    const job = await Job.update(req.params.id, req.body);
-    return res.json({ job });
+  const job = await Job.update(req.params.id, req.body);
+  return res.json({ job });
 });
 
 /** DELETE /[id]  =>  { deleted: id }
@@ -96,8 +96,8 @@ router.patch("/:id", ensureLoggedIn, isAdmin, async function (req, res, next) {
  */
 
 router.delete("/:id", ensureLoggedIn, isAdmin, async function (req, res, next) {
-    await Job.remove(req.params.id);
-    return res.json({ deleted: req.params.id });
+  await Job.remove(req.params.id);
+  return res.json({ deleted: req.params.id });
 });
 
 module.exports = router;
