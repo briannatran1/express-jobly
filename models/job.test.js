@@ -29,7 +29,6 @@ describe("create", function () {
     };
 
     test("created new job successful", async function () {
-        // let company = await Company.create(newCompany);
         let job = await Job.create(newJob);
         expect(job).toEqual(newJob);
 
@@ -166,7 +165,7 @@ describe("update", function () {
         expect(job).toEqual({
             id: 1,
             companyHandle: 'c1',
-            ...updateData,
+            ...updateDataSetNulls,
         });
 
         const result = await db.query(
@@ -191,12 +190,40 @@ describe("update", function () {
 
     test("not found if no such company", async function () {
         try {
-            await Job.update(10, updateDataSetNulls);
+            await Job.update(10, updateData);
             throw new Error("fail test, you shouldn't get here");
         } catch (err) {
             expect(err instanceof NotFoundError).toBeTruthy();
         }
     });
 
+    test("bad request with no data", async function () {
+        try {
+            await Job.update("c1", {});
+            throw new Error("fail test, you shouldn't get here");
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        }
+    });
+});
 
+/************************************** remove */
+
+describe("remove", function () {
+    test("works", async function () {
+        await Job.remove(1);
+        const res = await db.query(
+            "SELECT id FROM jobs WHERE id=1"
+        );
+        expect(res.rows.length).toEqual(0);
+    });
+
+    test("not found if no such job", async function () {
+        try {
+            await Job.remove(10);
+            throw new Error("fail test, you shouldn't get here");
+        } catch (err) {
+            expect(err instanceof NotFoundError).toBeTruthy();
+        }
+    });
 });
