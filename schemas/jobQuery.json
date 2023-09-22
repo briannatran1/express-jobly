@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/example.json",
+    "title": "Query Params",
+    "description": "Validates incoming query params",
+    "type": "object",
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "minSalary": {
+            "type": [
+                "integer"
+            ],
+            "minimum": 0
+        },
+        "hasEquity": {
+            "type": "boolean"
+        }
+    },
+    "additionalProperties": false
+}
